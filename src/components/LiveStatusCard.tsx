@@ -3,6 +3,7 @@ import ThermostatIcon from "@mui/icons-material/Thermostat";
 import OpacityIcon from "@mui/icons-material/Opacity";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import FallIcon from "@mui/icons-material/PersonOff";
 
 type Props = {
   temperature: number;
@@ -10,6 +11,9 @@ type Props = {
   flame: boolean;
   vibration: boolean;
   updatedAt: string;
+  todayFallCount?: number;
+  totalFallCount?: number;
+  onViewAllFalls?: () => void;
 };
 
 export default function LiveStatusCard({
@@ -18,6 +22,9 @@ export default function LiveStatusCard({
   flame,
   vibration,
   updatedAt,
+  todayFallCount = 0,
+  totalFallCount = 0,
+  onViewAllFalls,
 }: Props) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
@@ -228,6 +235,45 @@ export default function LiveStatusCard({
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black/90"></div>
                 </div>
               )}
+            </div>
+
+            {/* Fall Count */}
+            <div
+              className="bg-purple-950/40 rounded-2xl border border-purple-700/40 p-4 sm:p-5 flex flex-col justify-between animate-scaleIn transition-all duration-300 hover:bg-purple-950/60 hover:border-purple-700/60 hover:shadow-md hover:shadow-purple-500/10 cursor-pointer group relative"
+              style={{ animationDelay: "400ms" }}
+              onClick={onViewAllFalls}
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-semibold text-purple-200">
+                    Fall Detection
+                  </p>
+                  <div className="flex gap-2 mt-2">
+                    <div>
+                      <p className="text-xs text-purple-300 font-medium">
+                        Today
+                      </p>
+                      <p className="text-2xl sm:text-3xl font-bold text-purple-100">
+                        {todayFallCount}
+                      </p>
+                    </div>
+                    <div className="border-l border-purple-700/30"></div>
+                    <div className="flex-1">
+                      <p className="text-xs text-purple-300 font-medium">
+                        All Falls
+                      </p>
+                      <p className="text-2xl sm:text-3xl font-bold text-purple-100">
+                        {totalFallCount}
+                      </p>
+                    </div>
+                    <div className="flex flex-col justify-end text-right">
+                      <p className="text-xs text-purple-400 font-medium hover:text-purple-200 transition-colors whitespace-nowrap">
+                        Click →
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

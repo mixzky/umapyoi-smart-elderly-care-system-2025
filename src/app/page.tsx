@@ -11,11 +11,21 @@ interface LiveStatus {
   flame?: boolean;
   vibration?: boolean;
   updated_at: string;
+  today_fall_count?: number;
+  total_fall_count?: number;
 }
 
 export default function Home() {
   const [status, setStatus] = useState<LiveStatus | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleViewAllFalls = () => {
+    alert(
+      `Today's Falls: ${status?.today_fall_count ?? 0}\nTotal Falls: ${
+        status?.total_fall_count ?? 0
+      }\n\nClick to navigate to detailed falls report`
+    );
+  };
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -84,6 +94,9 @@ export default function Home() {
       flame={status.flame ?? false}
       vibration={status.vibration ?? false}
       updatedAt={formattedDate}
+      todayFallCount={status.today_fall_count ?? 0}
+      totalFallCount={status.total_fall_count ?? 0}
+      onViewAllFalls={handleViewAllFalls}
     />
   );
 }

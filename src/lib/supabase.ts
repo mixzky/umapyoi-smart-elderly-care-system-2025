@@ -34,11 +34,30 @@ export async function getLatestLiveStatus() {
   }
 }
 
-export async function subscribeToLiveStatus(callback: (data: any) => void) {
+interface LiveStatusRecord {
+  id: string;
+  temperature: number;
+  humidity: number;
+  updated_at: string;
+}
+
+interface LiveStatusPayload {
+  new: LiveStatusRecord;
+}
+
+export function subscribeToLiveStatus(
+  callback: (data: LiveStatusRecord) => void
+): ReturnType<typeof supabase.channel> {
   return supabase
-    .from("live_status")
-    .on("*", (payload) => {
-      callback(payload.new);
-    })
+    .channel("live_status")
+    .on(
+      "postgres_changes" as any,
+      { event: "*", schema: "public", table: "live_status" },
+      (payload: LiveStatusPayload) => {
+        if (payload.new) {
+          callback(payload.new);
+        }
+      }
+    )
     .subscribe();
 }

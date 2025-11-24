@@ -19,17 +19,17 @@ export default function Home() {
 
   useEffect(() => {
     const fetchStatus = async () => {
-      setLoading(true);
       const data = await getLatestLiveStatus();
       if (data) {
         setStatus(data);
+        setLoading(false);
       }
-      setLoading(false);
     };
 
+    // Initial fetch with loading state
     fetchStatus();
 
-    // Fetch new data every 5 seconds
+    // Fetch new data every 5 seconds without showing loading screen
     const interval = setInterval(fetchStatus, 5000);
 
     return () => clearInterval(interval);

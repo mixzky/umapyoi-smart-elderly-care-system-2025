@@ -8,7 +8,7 @@ interface LiveStatus {
   id: number | string;
   temperature: number;
   humidity: number;
-  flame?: boolean;
+  flame: number;
   vibration?: boolean;
   light?: number;
   sound?: number;
@@ -93,8 +93,10 @@ export default function Home() {
     <LiveStatusCard
       temperature={status.temperature}
       humidity={status.humidity}
-      flame={status.flame ?? false}
+      flame={status.flame ?? 0}
       vibration={status.vibration ?? false}
+      light={status.light ?? 0}
+      sound={status.sound ?? 0}
       updatedAt={formattedDate}
       todayFallCount={status.today_fall_count ?? 0}
       totalFallCount={status.total_fall_count ?? 0}

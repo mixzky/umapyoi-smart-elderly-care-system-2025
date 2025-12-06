@@ -93,13 +93,13 @@ export async function getLatestLiveStatus() {
     
     if (snapshot.exists()) {
       const data = snapshot.val();
-      console.log("📊 Firebase data:", data);
+      //console.log("📊 Firebase data:", data);
       
       return {
         id: Date.now().toString(),
         temperature: data.temperature || 0,
         humidity: data.humidity || 0,
-        flame: data.flame === 1 || data.flame === true,
+        flame: data.flame || 0,
         vibration: data.vibration === 1 || data.vibration === true,
         light: data.light || 0,
         sound: data.sound || 0,

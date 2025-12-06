@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import LiveStatusCard from "@/components/LiveStatusCard";
-import { getLatestLiveStatus } from "@/lib/supabase";
+import { getLatestLiveStatus } from "@/lib/firebase";
 
 interface LiveStatus {
-  id: number;
+  id: number | string;
   temperature: number;
   humidity: number;
   flame?: boolean;
   vibration?: boolean;
+  light?: number;
+  sound?: number;
   updated_at: string;
   today_fall_count?: number;
   total_fall_count?: number;

@@ -4,6 +4,7 @@ import OpacityIcon from "@mui/icons-material/Opacity";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import FallIcon from "@mui/icons-material/PersonOff";
+import CameraStream from "./CameraStream";
 
 type Props = {
   temperature: number;
@@ -80,29 +81,8 @@ export default function LiveStatusCard({
 
         {/* GRID: Webcam Left, Sensors Right */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          {/* LEFT: Webcam takes 2 columns on desktop */}
-          <div
-            className="md:col-span-2
-      bg-zinc-800/40 backdrop-blur-md border border-zinc-700/30
-      rounded-2xl p-4 flex flex-col animate-fadeIn transition-all duration-300 hover:bg-zinc-800/60 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-base sm:text-lg font-semibold text-amber-50">
-                Webcam Monitor
-              </p>
-              <span className="text-xs sm:text-sm text-zinc-400">
-                Preview only
-              </span>
-            </div>
-
-            {/* TEMP IMAGE */}
-            <div className="flex-1 rounded-xl bg-black/40 border border-white/10 overflow-hidden">
-              <img
-                src="/webcam-placeholder.jpg"
-                className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
-              />
-            </div>
-          </div>
+          {/* LEFT: ESP32-CAM Stream takes 2 columns on desktop */}
+          <CameraStream streamUrl="http://172.20.10.3/stream" />
 
           {/* RIGHT: Sensor cards */}
           <div className="flex flex-col gap-3 sm:gap-4 md:col-span-1">

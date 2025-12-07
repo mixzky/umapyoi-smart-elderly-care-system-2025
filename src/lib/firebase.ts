@@ -93,7 +93,7 @@ export async function getLatestLiveStatus() {
     
     if (snapshot.exists()) {
       const data = snapshot.val();
-      //console.log("📊 Firebase data:", data);
+      // console.log("📊 Firebase data:", data);
       
       return {
         id: Date.now().toString(),

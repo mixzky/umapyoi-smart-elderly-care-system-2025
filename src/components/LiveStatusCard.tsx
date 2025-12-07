@@ -13,12 +13,9 @@ type Props = {
   humidity: number;
   flame: number;
   vibration: boolean;
-  light: number; // Analog value 0-4095
-  sound: number; // Analog value 0-4095
+  light: number; 
+  sound: number;
   updatedAt: string;
-  todayFallCount?: number;
-  totalFallCount?: number;
-  onViewAllFalls?: () => void;
 };
 
 export default function LiveStatusCard({
@@ -29,15 +26,10 @@ export default function LiveStatusCard({
   light,
   sound,
   updatedAt,
-  todayFallCount = 0,
-  totalFallCount = 0,
-  onViewAllFalls,
 }: Props) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
-  // Convert analog values (0-4095) to calibrated levels
   const getLightLevel = (value: number): string => {
-    if (value < 512) return "Very Dark";
     if (value < 1024) return "Dark";
     if (value < 2048) return "Dim";
     if (value < 3072) return "Bright";
@@ -53,9 +45,19 @@ export default function LiveStatusCard({
   };
 
   const getFlameLevel = (value: number): string => {
-    if (value > 3072) return "Normal";
+    if (value > 100) return "Normal";
     return "Detected";
   };
+
+  const getLEDstatus = (value: number): string => {
+    if(value < 2000)return "ON";
+    return "OFF";
+  }
+
+  const getBuzzerStatus = (value: number): string => {
+    if(value < 100)return "ON";
+    return "OFF";
+  }
 
   const TooltipContent = ({ label }: { label: string }) => {
     const tooltips: { [key: string]: string } = {
@@ -114,7 +116,7 @@ export default function LiveStatusCard({
         {/* GRID: Webcam Left, Sensors Right */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* LEFT: ESP32-CAM Stream takes 2 columns on desktop */}
-          <CameraStream streamUrl="http://172.20.10.3/stream" />
+          <CameraStream streamUrl="http://172.20.10.9/stream" />
 
           {/* RIGHT: Sensor cards */}
           <div className="flex flex-col gap-3 sm:gap-3 md:col-span-1">
@@ -321,9 +323,55 @@ export default function LiveStatusCard({
                 </div>
               )}
             </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {/* LED Status */}
+              <div className="bg-indigo-950/40 rounded-2xl border border-indigo-700/40 p-3 sm:p-4 flex justify-between items-center animate-scaleIn transition-all duration-300 hover:bg-indigo-950/60 hover:border-indigo-700/60 hover:shadow-md hover:shadow-indigo-500/10 cursor-help group relative"
+              style={{ animationDelay: "600ms" }}>
+              <div>
+                <p className="text-xs font-semibold text-indigo-200">
+                LED Status
+                </p>
+                <p className="text-xl sm:text-2xl font-bold text-indigo-100 mt-1">
+                {getLEDstatus(light)}
+                </p>
+              </div>
+              <LightModeIcon
+                sx={{
+                fontSize: { xs: "1.75rem", sm: "2rem" },
+                color: "#6366f1",
+                animation: getLEDstatus(light) === "ON" 
+                  ? "pulseGentle 1.5s ease-in-out infinite" 
+                  : "pulseGentle 3s ease-in-out infinite",
+                }}
+              />
+              </div>
+
+              {/* Buzzer Status */}
+              <div className="bg-fuchsia-950/40 rounded-2xl border border-fuchsia-700/40 p-3 sm:p-4 flex justify-between items-center animate-scaleIn transition-all duration-300 hover:bg-fuchsia-950/60 hover:border-fuchsia-700/60 hover:shadow-md hover:shadow-fuchsia-500/10 cursor-help group relative"
+              style={{ animationDelay: "650ms" }}>
+              <div>
+              <p className="text-xs font-semibold text-fuchsia-200">
+              Buzzer Status
+              </p>
+              <p className="text-xl sm:text-2xl font-bold text-fuchsia-100 mt-1">
+              {getBuzzerStatus(flame)}
+              </p>
+              </div>
+              <VolumeUpIcon
+              sx={{
+                fontSize: { xs: "1.75rem", sm: "2rem" },
+                color: "#d946ef",
+                animation: getBuzzerStatus(sound) === "ON" 
+                ? "pulseWarning 1.5s ease-in-out infinite" 
+                : "pulseGentle 3s ease-in-out infinite",
+              }}
+              />
+              </div>
+            </div>
 
             {/* Fall Count */}
-            <div
+            {/* <div
               className="bg-purple-950/40 rounded-2xl border border-purple-700/40 p-3 sm:p-4 flex flex-col justify-between animate-scaleIn transition-all duration-300 hover:bg-purple-950/60 hover:border-purple-700/60 hover:shadow-md hover:shadow-purple-500/10 cursor-pointer group relative"
               style={{ animationDelay: "600ms" }}
               onClick={onViewAllFalls}
@@ -358,8 +406,8 @@ export default function LiveStatusCard({
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </div> 
+            </div>*/}
           </div>
         </div>
       </div>

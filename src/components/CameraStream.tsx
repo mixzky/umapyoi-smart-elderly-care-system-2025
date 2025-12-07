@@ -13,10 +13,9 @@ type Props = {
 };
 
 export default function CameraStream({
-  streamUrl = "http://172.20.10.3/stream",
+  streamUrl = "/api/camera-proxy",
 }: Props) {
   const [isConnected, setIsConnected] = useState(true);
-  const [imageKey, setImageKey] = useState(0);
   const [isAuto, setIsAuto] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -24,7 +23,11 @@ export default function CameraStream({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleRefresh = () => {
-    setImageKey((prev) => prev + 1);
+    if (imgRef.current) {
+      imgRef.current.src = `${streamUrl}`;
+    }
+    setResult(null);
+    setIsConnected(true);
   };
 
   const handleImageError = () => {
@@ -36,32 +39,60 @@ export default function CameraStream({
   };
 
   const checkSafety = async () => {
-    if (!imgRef.current || !canvasRef.current || !isConnected) return;
+    if (!canvasRef.current || !imgRef.current || !isConnected) return;
     
-    const ctx = canvasRef.current.getContext("2d");
-    if (!ctx) return;
-
-    // Set canvas dimensions to match image
-    canvasRef.current.width = imgRef.current.naturalWidth || imgRef.current.width;
-    canvasRef.current.height = imgRef.current.naturalHeight || imgRef.current.height;
-    
-    // Draw current frame to canvas
-    ctx.drawImage(imgRef.current, 0, 0);
-    
-    // Convert to base64
-    const base64 = canvasRef.current.toDataURL("image/jpeg");
     setAnalyzing(true);
 
     try {
+      // Capture frame directly from the stream img element
+      const img = imgRef.current;
+      
+      const ctx = canvasRef.current.getContext("2d");
+      if (!ctx) return;
+
+      const originalWidth = img.naturalWidth || img.width;
+      const originalHeight = img.naturalHeight || img.height;
+
+      const targetWidth = originalHeight;  
+      const targetHeight = originalWidth; 
+      
+      canvasRef.current.width = targetWidth;
+      canvasRef.current.height = targetHeight;
+      
+      ctx.save();
+      ctx.translate(targetWidth / 2, targetHeight / 2);
+      ctx.rotate(90 * Math.PI / 180);
+      ctx.drawImage(img, -originalWidth / 2, -originalHeight / 2, originalWidth, originalHeight);
+      
+      // Restore context
+      ctx.restore();
+      
+      // Convert to base64 with full quality
+      const base64 = canvasRef.current.toDataURL("image/jpeg", 1.0);
+
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const res = await fetch("/api/analyze-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: base64 }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
+      
       const data = await res.json();
       setResult(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error analyzing image:", error);
+      if (error.name === 'AbortError') {
+        setResult({ 
+          isFallen: false, 
+          description: "Analysis timeout - please try again" 
+        });
+      }
     } finally {
       setAnalyzing(false);
     }
@@ -149,18 +180,20 @@ export default function CameraStream({
       </div>
 
       {/* Camera Stream */}
-      <div className="flex-1 rounded-xl bg-black/40 border border-white/10 overflow-hidden relative min-h-[300px] sm:min-h-[400px] md:min-h-[500px]">
+      <div className="flex-1 rounded-xl bg-black/40 border border-white/10 overflow-hidden relative min-h-[300px] sm:min-h-[400px] md:min-h-[500px] flex items-center justify-center">
         {isConnected ? (
           <>
             <img
               ref={imgRef}
-              key={imageKey}
-              src={`${streamUrl}?t=${imageKey}`}
+              src={streamUrl}
               alt="ESP32-CAM Live Stream"
-              className="w-full h-full object-contain transition-opacity duration-300"
+              crossOrigin="anonymous"
+              className="max-w-none transition-opacity duration-300"
+              style={{
+                transform: 'rotate(90deg)'
+              }}
               onError={handleImageError}
               onLoad={handleImageLoad}
-              crossOrigin="anonymous"
             />
             <canvas ref={canvasRef} className="hidden" />
             {analyzing && (
